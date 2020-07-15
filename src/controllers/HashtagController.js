@@ -6,6 +6,9 @@ module.exports = {
 
         const hashtag = await Hashtag.find({ theme: themes })
 
+        if(hashtag.length < 1){
+            return res.status(204).json();
+        }
         return res.json(hashtag);
     },
 
