@@ -10,10 +10,17 @@ const MessageController = require('./controllers/MessageController');
 const routes = express.Router();
 const upload = multer(uploadConfig);
 
+//hashtag
 routes.post('/hashtag', HashtagController.create);
 routes.get('/hashtag', HashtagController.index);
-routes.post('/users', upload.single('picture') ,UserController.create);
-routes.post('/group', upload.single('picture'),GroupController.create);
+
+//user
+routes.post('/users', upload.single('picture'), UserController.create);
+routes.put('/users', upload.single('picture'), UserController.update);
+routes.get('/users', UserController.index);
+
+//others
+routes.post('/group', upload.single('picture'), GroupController.create);
 routes.post('/message', MessageController.information);
 
 module.exports = routes;
