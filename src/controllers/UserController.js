@@ -17,7 +17,7 @@ module.exports = {
         //Se ele encontrar um usúario com este e=mail ele vai salvar no user 
         let user = await User.findOne({email});
 
-        //Verificação para ver se e-mail já está cadastro, caso não foi irá entrar no if
+        //Verificação para ver se e-mail já está cadastrado, caso não foi irá entrar no if
         if(!user){
             user = await User.create({
                 fullname, 
@@ -42,7 +42,7 @@ module.exports = {
         //Se ele encontrar um usúario com este e=mail ele vai salvar no user 
         let user = await User.findOne({email});
 
-        //Verificação para ver se e-mail já está cadastro se existir faz a atualização
+        //Verificação para ver se o e-mail já está cadastrado, se existir faz a atualização
         if(user){
 
             user = await User.update({
@@ -58,5 +58,15 @@ module.exports = {
         };
 
         return res.json(user);
+    },
+
+    //destroy
+    async delete(req, res){
+
+        const {email} = req.body
+
+        let user = await User.deleteOne({ email : email })
+
+        return res.json(user)
     }
 };

@@ -18,6 +18,7 @@ routes.get('/hashtag', HashtagController.index);
 routes.post('/users', upload.single('picture'), UserController.create);
 routes.put('/users', upload.single('picture'), UserController.update);
 routes.get('/users', UserController.index);
+routes.delete('/users', UserController.delete);
 
 //others
 routes.post('/group', upload.single('picture'), GroupController.create);
