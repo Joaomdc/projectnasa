@@ -1,4 +1,8 @@
 const User = require('../models/User');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
+const authConfig = require('../config/auth');
 
 module.exports = {
 
@@ -9,13 +13,24 @@ module.exports = {
         return res.json(user)
     },
 
-    // Criação do cadastro
+    /**
+     * Função para criação de usuário
+     * @param {*usuario} req 
+     * @param {*usuario} res 
+     */
     async create(req, res){
         const { fullname, email, username, password, state, country, help} = req.body;
-        const { picture } = req.file;
+        const { filename } = req.file;
+
+        //console.log(filename);
 
         //Se ele encontrar um usúario com este e=mail ele vai salvar no user 
-        let user = await User.findOne({email});
+        let user = await User.findOne( { email } );
+
+        //Caso já exista um e-mail cadastrado ele irá responder status 400
+        if(user){
+            return res.status(400).send( { error: 'Usuário já existe'} )
+        }
 
         //Verificação para ver se e-mail já está cadastrado, caso não foi irá entrar no if
         if(!user){
@@ -26,7 +41,7 @@ module.exports = {
                 password, 
                 state, 
                 country, 
-                picture, 
+                picture: filename, 
                 help
             });
         };
@@ -63,10 +78,38 @@ module.exports = {
     //destroy
     async delete(req, res){
 
-        const {email} = req.body
+        const {id} = req.body
 
-        let user = await User.deleteOne({ email : email })
+        let user = await User.deleteOne({ _id : id })
 
         return res.json(user)
+    },
+
+    //autenticação
+    async authenticate(req, res){
+        const { email, password } = req.body; 
+
+        const user = await User.findOne( { email } ).select('+password');
+
+        if (!user){
+            return res.status(400).send( { error: 'Usuário não encontrado'});
+        }
+
+        //Comparando para ver se a senha que o usuário digitou é a mesma que a do banco de dados. Await por que é uma função assincrona
+        if(!await bcrypt.compare(password, user.password)){
+            return res.status(400).send( { error: 'Senha Inválida'});
+        }
+
+        //Para não voltar a senha
+        user.password = undefined;
+
+        // TODO: Token para 1 dia
+        const token = jwt.sign( { id: user._id }, authConfig.secret,  {
+            expiresIn: 86400,
+        });
+
+        res.send( { user, token } );
+        
     }
+
 }; // teste

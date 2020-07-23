@@ -4,7 +4,7 @@ const User = require('../models/User');
 module.exports = {
     async create(req, res){
         const { filename } = req.file;
-        const { title, description} = req.body;
+        const { title, description, participants} = req.body;
         // Headers para enviar contexto de autenticação
         const { user_id } = req.headers;
         const { hashtag_id } = req.headers;
@@ -21,9 +21,22 @@ module.exports = {
             picture: filename,
             title,
             description,
-            hashtag: hashtag_id
+            hashtag: hashtag_id,
+            participants
         })
 
+        return res.json(group);
+    },
+
+    async index(req, res){
+        const group = {
+            user: 2,
+            picture: 'imagem.jpeg',
+            title: 'so vem grupao',
+            description: 'alou cajsiodjaio',
+            hashtag: 1,
+            participants: 2
+        }
         return res.json(group);
     }
 };
