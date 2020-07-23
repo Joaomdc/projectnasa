@@ -10,18 +10,24 @@ const MessageController = require('./controllers/MessageController');
 const routes = express.Router();
 const upload = multer(uploadConfig);
 
+const authMiddleware = require('./middlewares/auth');
+
 //hashtag
 routes.post('/hashtag', HashtagController.create);
 routes.get('/hashtag', HashtagController.index);
 
 //user
 routes.post('/users', upload.single('picture'), UserController.create);
-routes.put('/users', upload.single('picture'), UserController.update);
-routes.get('/users', UserController.index);
-routes.delete('/users', UserController.delete);
+routes.put('/users', authMiddleware ,upload.single('picture'), UserController.update);
+routes.get('/users', authMiddleware , UserController.index);
+routes.delete('/users', authMiddleware , UserController.delete);
+routes.post('/authenticate', UserController.authenticate);
 
-//others
-routes.post('/group', upload.single('picture'), GroupController.create);
-routes.post('/message', MessageController.information);
+//Group
+routes.post('/group', authMiddleware, upload.single('picture'), GroupController.create);
+routes.get('/group', authMiddleware, GroupController.index);
+
+//Message
+routes.post('/message', authMiddleware, MessageController.information);
 
 module.exports = routes;

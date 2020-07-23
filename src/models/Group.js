@@ -11,7 +11,8 @@ const GroupSchema = new mongoose.Schema({
     hashtag: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Hashtag'
-    }
+    },
+    participants: Number
 });
 
 module.exports = mongoose.model('Group', GroupSchema);
