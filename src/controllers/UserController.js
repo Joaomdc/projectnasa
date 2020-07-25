@@ -1,6 +1,8 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const mailer = require('../modules/mailer');
 
 const authConfig = require('../config/auth');
 
@@ -110,6 +112,88 @@ module.exports = {
 
         res.send( { user, token } );
         
+    },
+
+    /**
+     * Função de envio de e-mail de esqueci senha
+     * @param {*usuario} req 
+     * @param {*usuario} res 
+     */
+    async forgot_password(req, res){
+        const { email } = req.body;
+
+        try{
+            const user = await User.findOne( { email });
+
+            if(!user){
+                return res.status(400).send( { error: 'Usuário não encontrado' } )
+            }
+
+            const token = crypto.randomBytes(20).toString('hex');
+            
+            const now = new Date();
+            now.setHours(now.getHours() + 1);
+
+            await User.findByIdAndUpdate( user._id, {
+                '$set': {
+                    passwordResetToken: token,
+                    passwordResetExpires: now,
+                }
+            });
+
+            mailer.sendMail({
+                to: email,
+                from: 'visitantesilvapc@gmail.com',
+                template: './forgot_password',
+                context: { token },
+            }, (err) => {
+                if (err){
+                    return res.status(400).send( { error: 'Não foi possível enviar o e-mail de esqueci a senha, tente novamente'})
+                }
+
+                return res.status(201).send("E-mail enviado com sucesso");
+            });
+
+        } catch (err){
+            res.status(400).send( { error: 'Erro em esqueci a senha, tente novamente' } )
+        }
+    },
+
+    /**
+     * Função para resetar a senha
+     * @param {*usuario} req 
+     * @param {*usuario} res 
+     */
+    async reset_password(req, res){
+        const { email, token, password } = req.body;
+
+        try{
+            const user = await User.findOne( { email }).select('+passwordResetToken passwordResetExpires');
+
+            if(!user){
+                return res.status(400).send( { error: 'Usuário não encontrado' } )
+            }
+
+            if (token !== user.passwordResetToken){
+                return res.status(400).send( { error: 'Token Inválido' } )
+            }
+
+            const now = new Date();
+
+            if (now > user.passwordResetExpires){
+                return res.status(400).send( { error: 'Token expirado, tente novamente' } )
+            }
+
+            user.password = password;
+
+            await user.save();
+
+            res.send();
+
+        } catch (err){
+            res.status(400).send( { error: "Não é possível resetar a senha, tente novamente mais tarde"} )
+        }
+
     }
 
 }; // teste
