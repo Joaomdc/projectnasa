@@ -6,6 +6,14 @@ const UserSchema = new mongoose.Schema({
     email: String,
     username: String,
     password: String,
+    passwordResetToken: {
+        type: String,
+        select: false,
+    }, 
+    passwordResetExpires: {
+        type: Date,
+        select: false,
+    },
     state: String,
     country: String,
     picture: String,
