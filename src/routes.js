@@ -22,6 +22,8 @@ routes.put('/users', authMiddleware ,upload.single('picture'), UserController.up
 routes.get('/users', authMiddleware , UserController.index);
 routes.delete('/users', authMiddleware , UserController.delete);
 routes.post('/authenticate', UserController.authenticate);
+routes.post('/forgot_password', UserController.forgot_password);
+routes.post('/reset_password', UserController.reset_password);
 
 //Group
 routes.post('/group', authMiddleware, upload.single('picture'), GroupController.create);
