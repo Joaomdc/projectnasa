@@ -10,9 +10,25 @@ module.exports = {
 
     // Listar todos os usuários
     async index(req, res){
-        const user = await User.find();
+        try{
+            const user = await User.find();
 
-        return res.json(user)
+            return res.json(user)
+        } catch (err){
+            return res.status(400).send( { error: 'Erro ao listar todos os usuários'} )
+        } 
+    },
+
+    // Listar o usúario por ID
+    async indexID(req, res){
+        try{
+            const user = await User.findById(req.body);
+    
+            return res.send({user});
+        }catch (err){
+            return res.status(400).send({ error: 'Erro ao listar os usuário por ID'});
+        }
+        
     },
 
     /**
@@ -21,7 +37,8 @@ module.exports = {
      * @param {*usuario} res 
      */
     async create(req, res){
-        const { fullname, email, username, password, state, country, help} = req.body;
+        try{
+            const { fullname, email, username, password, state, country, help} = req.body;
         const { filename } = req.file;
 
         //console.log(filename);
@@ -47,44 +64,52 @@ module.exports = {
                 help
             });
         };
-
         return res.json(user);
+
+        } catch (err){
+            return res.status(400).send( { error: 'Erro ao criar usuário'} )
+        }         
     },
 
     // Atualização do cadastro
     async update(req, res){
-        const { fullname, email, username, password, state, country, help} = req.body;
-        const { picture } = req.file;
+        try{
+            const { fullname, email, username, password, state, country, help} = req.body;
+            const { picture } = req.file;
 
-        //Se ele encontrar um usúario com este e=mail ele vai salvar no user 
-        let user = await User.findOne({email});
+            //Se ele encontrar um usúario com este e=mail ele vai salvar no user 
+            let user = await User.findOne({email});
 
-        //Verificação para ver se o e-mail já está cadastrado, se existir faz a atualização
-        if(user){
-
-            user = await User.update({
-                fullname,
-                email, 
-                username, 
-                password, 
-                state, 
-                country, 
-                picture, 
-                help
-            });
-        };
-
-        return res.json(user);
+            //Verificação para ver se o e-mail já está cadastrado, se existir faz a atualização
+            if(user){
+                user = await User.update({
+                    fullname,
+                    email, 
+                    username, 
+                    password, 
+                    state, 
+                    country, 
+                    picture, 
+                    help
+                });
+            };
+            return res.json(user);
+        }catch (err){
+            return res.status(400).send({ error: 'Erro ao atualizar os dados do usuário'});
+        }    
     },
 
     //destroy
     async delete(req, res){
+        try{
+            const {id} = req.body
 
-        const {id} = req.body
-
-        let user = await User.deleteOne({ _id : id })
-
-        return res.json(user)
+            let user = await User.deleteOne({ _id : id })
+    
+            return res.json(user)
+        } catch (err){
+            return res.status(400).send( { error: 'Erro ao deletar usuário'} )
+        }
     },
 
     //autenticação

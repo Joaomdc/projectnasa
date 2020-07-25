@@ -1,24 +1,48 @@
 const Hashtag = require('../models/Hashtag');
 
 module.exports = {
-    async index(req, res){
-        const { themes } = req.query;
+    async indexbyId(req, res){
+        try{
+            const hashtag = await Hashtag.findById(req.params.hashtagId);
 
-        const hashtag = await Hashtag.find({ theme: themes })
-
-        if(hashtag.length < 1){
-            return res.status(204).json();
+            return res.json(hashtag)
+        } catch (err){
+            return res.status(400).send( { error: 'Erro para listar as hashtags por ID'} )
         }
-        return res.json(hashtag);
     },
 
     async create(req, res){
-        const { theme } = req.body;
-        const { description } = req.body;
+        try{    
+            const { theme, description} = req.body;
 
-        const hash = await Hashtag.create({theme}, {description});
+            const hash = await Hashtag.create({
+                theme, 
+                description
+            });
 
-        return res.json(hash);
+            return res.json(hash);
+        } catch (err){
+            return res.status(400).send( { error: 'Erro para cadastrar as hashtags'} )
+        }
+    }, 
+
+    async index(req, res){
+        try{
+            const hashtag = await Hashtag.find();
+
+            return res.json(hashtag)
+        } catch (err){
+            return res.status(400).send( { error: 'Erro para listar as hashtags'} )
+        }
+    },
+    
+    async delete(req, res){
+        try{
+            const hashtag = await Hashtag.findByIdAndRemove(req.params.hashtagId);
+
+            return res.send();
+        } catch (err){
+            return res.status(400).send( { error: 'Erro ao deletar Hashtag, tente novamente mais tarde'} )
+        }        
     }
-
 };

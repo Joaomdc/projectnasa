@@ -14,12 +14,15 @@ const authMiddleware = require('./middlewares/auth');
 
 //hashtag
 routes.post('/hashtag', HashtagController.create);
+routes.get('/hashtag/:hashtagId', HashtagController.indexbyId);
 routes.get('/hashtag', HashtagController.index);
+routes.delete('/hashtag/:hashtagId', HashtagController.delete);
 
 //user
 routes.post('/users', upload.single('picture'), UserController.create);
 routes.put('/users', authMiddleware ,upload.single('picture'), UserController.update);
-routes.get('/users', authMiddleware , UserController.index);
+routes.get('/users', UserController.index);
+routes.get('/usersEmail', UserController.indexID);
 routes.delete('/users', authMiddleware , UserController.delete);
 routes.post('/authenticate', UserController.authenticate);
 routes.post('/forgot_password', UserController.forgot_password);
@@ -27,7 +30,10 @@ routes.post('/reset_password', UserController.reset_password);
 
 //Group
 routes.post('/group', authMiddleware, upload.single('picture'), GroupController.create);
-routes.get('/group', authMiddleware, GroupController.index);
+routes.get('/group', GroupController.index);
+routes.get('/group/:groupId', GroupController.indexById);
+routes.put('/group/:groupId', authMiddleware, upload.single('picture'), GroupController.update);
+routes.delete('/group/:groupId', GroupController.delete);
 
 //Message
 routes.post('/message', authMiddleware, MessageController.information);

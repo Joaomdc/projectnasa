@@ -3,40 +3,77 @@ const User = require('../models/User');
 
 module.exports = {
     async create(req, res){
-        const { filename } = req.file;
-        const { title, description, participants} = req.body;
-        // Headers para enviar contexto de autenticação
-        const { user_id } = req.headers;
-        const { hashtag_id } = req.headers;
-
-        //Verificação para ver se o ID é existente, ao contrário volta erro
-        const user = await User.findById(user_id);
-
-        if (!user){
-            return res.status(400).json({ error: 'User does not exists' });
+        try{
+            const { filename } = req.file;
+            const { title, description, participants} = req.body;
+            // Headers para enviar contexto de autenticação
+            const { hashtag_id } = req.headers;
+            
+            const group = await Group.create({
+                user: req.userId,
+                picture: filename,
+                title,
+                description,
+                hashtag: hashtag_id,
+                participants
+            })
+            return res.json(group);
+        } catch (err){
+            return res.status(400).send( { error: 'Erro para cadastro de sala, tente novamente'} )
         }
+    },
 
-        const group = await Group.create({
-            user: user_id,
-            picture: filename,
-            title,
-            description,
-            hashtag: hashtag_id,
-            participants
-        })
+    async update(req, res){
+        try{
+            const { filename } = req.file;
+            const { title, description, participants} = req.body;
+            // Headers para enviar contexto da alteração
+            const { user_id } = req.headers;
+            const { hashtag_id } = req.headers;
 
-        return res.json(group);
+        //Verificação para pegar campo id do usúario e dar update
+            const room = await Group.findByIdAndUpdate(req.params.groupId, { 
+                picture: filename,
+                title, 
+                description,
+                participants,
+        }, { new: true });
+
+        return res.json(room);
+
+        } catch (err){
+            return res.status(400).send( { error: 'Erro para atualizar informações da sala'} )
+        }
     },
 
     async index(req, res){
-        const group = {
-            user: 2,
-            picture: 'imagem.jpeg',
-            title: 'so vem grupao',
-            description: 'alou cajsiodjaio',
-            hashtag: 1,
-            participants: 2
+        try{
+            const group = await Group.find().populate(['user', 'hashtag']);
+
+            return res.json(group)
+        } catch (err){
+            return res.status(400).send( { error: 'Erro para listar todas as salas'} )
         }
-        return res.json(group);
+
+    },
+
+    async indexById(req, res){
+        try{
+            const group = await Group.findById(req.params.groupId).populate(['user', 'hashtag']);
+
+            return res.json(group)
+        } catch (err){
+            return res.status(400).send( { error: 'Erro para listar a sala por ID'} )
+        }
+    },
+
+    async delete(req, res){
+        try{
+            const group = await Group.findByIdAndRemove(req.params.groupId);
+
+            return res.send();
+        } catch (err){
+            return res.status(400).send( { error: 'Erro ao deletar sala, tente novamente mais tarde'} )
+        }        
     }
 };
