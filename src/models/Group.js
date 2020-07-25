@@ -6,11 +6,13 @@ const GroupSchema = new mongoose.Schema({
     picture: String,
     user: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'User',
+        require: true,
     },
     hashtag: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Hashtag'
+        ref: 'Hashtag',
+        require: true,
     },
     participants: Number
 });
