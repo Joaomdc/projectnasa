@@ -32,6 +32,7 @@ routes.post('/reset_password', UserController.reset_password);
 routes.post('/group', authMiddleware, upload.single('picture'), GroupController.create);
 routes.get('/group', GroupController.index);
 routes.get('/group/:groupId', GroupController.indexById);
+routes.get('/groupbyroom', GroupController.indexByRoom);
 routes.put('/group/:groupId', authMiddleware, upload.single('picture'), GroupController.update);
 routes.delete('/group/:groupId', GroupController.delete);
 

@@ -17,7 +17,14 @@ const UserSchema = new mongoose.Schema({
     state: String,
     country: String,
     picture: String,
-    help: Boolean,
+    help: {
+        type: Boolean,
+        default: false,
+    }, 
+    acceptTerm: {
+        type: Boolean,
+        default: false,
+    },
 },  
     { timestamps: true } 
 );
