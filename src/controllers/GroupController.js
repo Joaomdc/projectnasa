@@ -1,6 +1,7 @@
 const Group = require('../models/Group');
 const User = require('../models/User');
 const Hashtag = require('../models/Hashtag');
+const { hash } = require('bcryptjs');
 
 module.exports = {
     async create(req, res){
@@ -58,13 +59,14 @@ module.exports = {
 
     },
 
-    async indexById(req, res){
+    async indexByGroupId(req, res){
         try{
             const group = await Group.findById(req.params.groupId).populate(['user', 'hashtag']);
 
             return res.json(group)
         } catch (err){
-            return res.status(400).send( { error: 'Erro para listar a sala por ID'} )
+            console.log(err);
+            return res.status(400).send( { error: 'Erro para listar a sala por ID do Grupo'} )
         }
     },
 
@@ -78,18 +80,15 @@ module.exports = {
         }        
     },
 
-    async indexByRoom(req, res){
+    async indexByHashtagId(req, res){
         try{
             const { hashtag } = req.body;
 
-            const group = await Group.find({ hashtag: hashtag }).populate(['user', 'hashtag']);
+            const byhash = await Group.find({ hashtag: hashtag }).populate(['user', 'hashtag']);
 
-            return res.json(group);
+            return res.json(byhash);
         } catch (err){
-            console.log(err);
-            return res.status(400).send( { error: 'Erro para listar todas as sala por Hashtag'} )
+            return res.status(400).send( { error: 'Erro para listar todas as sala por ID do Hashtag'} )
         }
-
-    }
-
+    },
 };
