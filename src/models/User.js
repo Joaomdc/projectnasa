@@ -17,7 +17,22 @@ const UserSchema = new mongoose.Schema({
     state: String,
     country: String,
     picture: String,
-    help: Boolean,
+    help: {
+        type: Boolean,
+        default: false,
+    }, 
+    acceptTerm: {
+        type: Boolean,
+        default: false,
+    },
+    statusAccount: {
+        type: Number,
+        default: 2
+    },
+    accountToken: {
+        type: String,
+        select: false,
+    },
 },  
     { timestamps: true } 
 );

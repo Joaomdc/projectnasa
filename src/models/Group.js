@@ -14,7 +14,11 @@ const GroupSchema = new mongoose.Schema({
         ref: 'Hashtag',
         require: true,
     },
-    participants: Number
+    participants: Number,
+    ativo: {
+        type: Boolean,
+        default: true,
+    },
 });
 
 module.exports = mongoose.model('Group', GroupSchema);
