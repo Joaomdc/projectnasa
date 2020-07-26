@@ -6,6 +6,38 @@ const mailer = require('../modules/mailer');
 
 const authConfig = require('../config/auth');
 
+
+//Função de envio de e-mail para confirmação de conta
+async function submit_account(user){        
+    try{
+        const token = crypto.randomBytes(20).toString('hex');
+
+        await User.findByIdAndUpdate( user._id, {
+            '$set': {
+                accountToken: token,
+            }
+        });
+
+        mailer.sendMail({
+            to: user.email,
+            from: 'visitantesilvapc@gmail.com',
+            template: './submit_account',
+            context: { token, id: user._id},
+        }, (err) => {
+            if (err){
+                return res.status(400).send( { error: 'Não foi possível enviar o e-mail para cadastrar a conta, tente novamente'})
+            }
+
+            console.log(user);
+            return res.status(201).send("E-mail enviado com sucesso");
+        });
+        
+
+    } catch (err){
+        res.status(400).send( { error: 'Erro para cadastrar conta, tente novamente' } )
+    }
+};
+
 module.exports = {
 
     // Listar todos os usuários
@@ -39,37 +71,65 @@ module.exports = {
     async create(req, res){
         try{
             const { fullname, email, username, password, state, country, help} = req.body;
-        const { filename } = req.file;
+            const { filename } = req.file;
 
-        //console.log(filename);
+            //Se ele encontrar um usúario com este e=mail ele vai salvar no user 
+            let user = await User.findOne( { email } );
 
-        //Se ele encontrar um usúario com este e=mail ele vai salvar no user 
-        let user = await User.findOne( { email } );
+            //Caso já exista um e-mail cadastrado ele irá responder status 400
+            if(user){
+                return res.status(400).send( { error: 'Usuário já existe'} )
+            }
 
-        //Caso já exista um e-mail cadastrado ele irá responder status 400
-        if(user){
-            return res.status(400).send( { error: 'Usuário já existe'} )
-        }
-
-        //Verificação para ver se e-mail já está cadastrado, caso não foi irá entrar no if
-        if(!user){
-            user = await User.create({
-                fullname, 
-                email, 
-                username, 
-                password, 
-                state, 
-                country, 
-                picture: filename, 
-                help
-            });
+            //Verificação para ver se e-mail já está cadastrado, caso não foi irá entrar no if
+            if(!user){
+                user = await User.create({
+                    fullname, 
+                    email, 
+                    username, 
+                    password, 
+                    state, 
+                    country, 
+                    picture: filename, 
+                    help
+                });
         };
+
+        submit_account(user);
+
         return res.json(user);
 
         } catch (err){
             return res.status(400).send( { error: 'Erro ao criar usuário'} )
         }         
     },
+
+    //Função para atualizar o statusAccount (Confirmação por e-mail)
+    async update_statusAccount(req, res){
+        const { user_id, token } = req.body;
+
+        try{
+            const user = await User.findById( { _id: user_id }).select('+accountToken');
+
+            if(!user){
+                return res.status(400).send( { error: 'Usuário não encontrado' } )
+            }
+
+            if (token !== user.accountToken){
+                return res.status(400).send( { error: 'Token Inválido' } )
+            }
+
+            user.statusAccount = 1;
+
+            await user.save();
+
+            res.send();
+
+        } catch (err){
+            res.status(400).send( { error: "Não é possível resetar a senha, tente novamente mais tarde"} )
+        }
+
+    },    
 
     // Atualização do cadastro
     async update(req, res){
@@ -122,8 +182,12 @@ module.exports = {
             return res.status(400).send( { error: 'Usuário não encontrado'});
         }
 
+        if (user.statusAccount == 2){
+            return res.status(400).send( { error: 'Usuário não confirmado, por favor verificar e-mail'});
+        }
+        
         //Comparando para ver se a senha que o usuário digitou é a mesma que a do banco de dados. Await por que é uma função assincrona
-        if(!await bcrypt.compare(password, user.password)){
+        if(await bcrypt.compare(password, user.password)){
             return res.status(400).send( { error: 'Senha Inválida'});
         }
 

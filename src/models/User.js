@@ -25,6 +25,14 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    statusAccount: {
+        type: Number,
+        default: 2
+    },
+    accountToken: {
+        type: String,
+        select: false,
+    },
 },  
     { timestamps: true } 
 );
