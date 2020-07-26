@@ -1,5 +1,6 @@
 const Group = require('../models/Group');
 const User = require('../models/User');
+const Hashtag = require('../models/Hashtag');
 
 module.exports = {
     async create(req, res){
@@ -75,5 +76,20 @@ module.exports = {
         } catch (err){
             return res.status(400).send( { error: 'Erro ao deletar sala, tente novamente mais tarde'} )
         }        
+    },
+
+    async indexByRoom(req, res){
+        try{
+            const { hashtag } = req.body;
+
+            const group = await Group.find({ hashtag: hashtag }).populate(['user', 'hashtag']);
+
+            return res.json(group);
+        } catch (err){
+            console.log(err);
+            return res.status(400).send( { error: 'Erro para listar todas as sala por Hashtag'} )
+        }
+
     }
+
 };
