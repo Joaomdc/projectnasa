@@ -100,6 +100,11 @@ module.exports = {
     async create(req, res){
         try{
             const { fullname, email, username, password, state, country, help} = req.body;
+
+            if(!req.file){
+                return res.status(400).send( { error: 'Envio da imagem é obrigatória', imageRequire: true} )
+            }
+
             const { filename } = req.file;
 
             //Se ele encontrar um usúario com este e=mail ele vai salvar no user 
@@ -141,6 +146,11 @@ module.exports = {
     async createV2(req, res){
         try{
             const { fullname, email, username, password, state, country, help} = req.body;
+
+            if(!req.file){
+                return res.status(400).send( { error: 'Envio da imagem é obrigatória', imageRequire: true} )
+            }
+
             const { filename } = req.file;
 
             //Se ele encontrar um usúario com este e=mail ele vai salvar no user 
