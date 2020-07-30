@@ -23,12 +23,11 @@ async function submit_account_token(user){
             from: 'visitantesilvapc@gmail.com',
             template: './submit_account',
             context: { token, id: user._id},
+            subject: "Shawime: Confirmação de conta com token"
         }, (err) => {
             if (err){
                 return res.status(400).send( { error: 'Não foi possível enviar o e-mail para cadastrar a conta, tente novamente'})
             }
-
-            console.log(user);
             return res.status(201).send("E-mail enviado com sucesso");
         });
         
@@ -54,12 +53,11 @@ async function submit_account_code(user){
             from: 'visitantesilvapc@gmail.com',
             template: './submit_account_code',
             context: { code },
+            subject: "Shawime: Seu código de confirmação está aqui",
         }, (err) => {
             if (err){
                 return res.status(400).send( { error: 'Não foi possível enviar o código para confirmação, tente novamente'})
             }
-
-            console.log(user);
             return res.status(201).send("E-mail enviado com sucesso");
         });
         
@@ -172,6 +170,7 @@ module.exports = {
         return res.json(user);
 
         } catch (err){
+            console.log(err);
             return res.status(400).send( { error: 'Erro ao criar usuário'} )
         }         
     },    
@@ -276,7 +275,7 @@ module.exports = {
     async authenticate(req, res){
         const { email, password } = req.body; 
 
-        const user = await User.findOne( { email } ).select('+password');
+        const user = await User.findOne({ email }).select('+password');
 
         if (!user){
             return res.status(400).send( { error: 'Usuário não encontrado'});
@@ -335,6 +334,7 @@ module.exports = {
                 from: 'visitantesilvapc@gmail.com',
                 template: './forgot_password',
                 context: { token },
+                subject: "Shawime: Token para troca de senha",
             }, (err) => {
                 if (err){
                     return res.status(400).send( { error: 'Não foi possível enviar o e-mail de esqueci a senha, tente novamente'})
@@ -407,6 +407,7 @@ module.exports = {
                 from: 'visitantesilvapc@gmail.com',
                 template: './new_password',
                 context: { newPass },
+                subject: "Shawime: Nova solicitação de senha",
             }, (err) => {
                 if (err){
                     return res.status(400).send( { error: 'Não foi possível enviar o e-mail com nova senha, tente novamente'})

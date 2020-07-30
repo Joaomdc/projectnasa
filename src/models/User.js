@@ -43,10 +43,13 @@ const UserSchema = new mongoose.Schema({
 
 /** Função para criar hash da senha. Só irá salvar no banco depois de gerar o hash*/
 UserSchema.pre('save', async function(next) {
-    const hash = await bcrypt.hash(this.password, 10);
-    this.password = hash;
-
-    next();
+    let user = this;
+    if (user.isModified("password") || user.isNew) {
+        const hash = await bcrypt.hash(this.password, 10);
+        this.password = hash;
+    } else {
+        return next();
+    }
 });
 
 module.exports = mongoose.model('User', UserSchema);
