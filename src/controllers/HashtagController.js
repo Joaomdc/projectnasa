@@ -7,7 +7,7 @@ module.exports = {
 
             return res.json(hashtag)
         } catch (err){
-            return res.status(400).send( { error: 'Erro para listar as hashtags por ID'} )
+            return res.status(400).send( { error: 'Error to list hashtags by ID'} )
         }
     },
 
@@ -22,7 +22,7 @@ module.exports = {
 
             return res.json(hash);
         } catch (err){
-            return res.status(400).send( { error: 'Erro para cadastrar as hashtags'} )
+            return res.status(400).send( { error: 'Error to register the hashtags'} )
         }
     }, 
 
@@ -32,7 +32,7 @@ module.exports = {
 
             return res.json(hashtag)
         } catch (err){
-            return res.status(400).send( { error: 'Erro para listar as hashtags'} )
+            return res.status(400).send( { error: 'Error to list hashtags'} )
         }
     },
     
@@ -42,7 +42,7 @@ module.exports = {
 
             return res.send();
         } catch (err){
-            return res.status(400).send( { error: 'Erro ao deletar Hashtag, tente novamente mais tarde'} )
+            return res.status(400).send( { error: 'Error to delete Hashtag, please try again later'} )
         }        
     }
 };
