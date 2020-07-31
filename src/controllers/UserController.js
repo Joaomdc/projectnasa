@@ -8,7 +8,7 @@ const authConfig = require('../config/auth');
 
 
 //Função de envio de e-mail para confirmação de conta
-async function submit_account(user){        
+async function submit_account_token(user){        
     try{
         const token = crypto.randomBytes(20).toString('hex');
 
@@ -23,12 +23,41 @@ async function submit_account(user){
             from: 'visitantesilvapc@gmail.com',
             template: './submit_account',
             context: { token, id: user._id},
+            subject: "Shawime: Confirmação de conta com token"
         }, (err) => {
             if (err){
                 return res.status(400).send( { error: 'Não foi possível enviar o e-mail para cadastrar a conta, tente novamente'})
             }
+            return res.status(201).send("E-mail enviado com sucesso");
+        });
+        
 
-            console.log(user);
+    } catch (err){
+        res.status(400).send( { error: 'Erro para cadastrar conta, tente novamente' } )
+    }
+};
+
+//Função de envio de e-mail para confirmação de conta por código de número (6 aleatórios)
+async function submit_account_code(user){        
+    try{
+        const code = Math.floor(100000 + Math.random() * 900000);
+
+        await User.findByIdAndUpdate( user._id, {
+            '$set': {
+                confirmation_code: code,
+            }
+        });
+
+        mailer.sendMail({
+            to: user.email,
+            from: 'visitantesilvapc@gmail.com',
+            template: './submit_account_code',
+            context: { code },
+            subject: "Shawime: Seu código de confirmação está aqui",
+        }, (err) => {
+            if (err){
+                return res.status(400).send( { error: 'Não foi possível enviar o código para confirmação, tente novamente'})
+            }
             return res.status(201).send("E-mail enviado com sucesso");
         });
         
@@ -71,6 +100,11 @@ module.exports = {
     async create(req, res){
         try{
             const { fullname, email, username, password, state, country, help} = req.body;
+
+            if(!req.file){
+                return res.status(400).send( { error: 'Envio da imagem é obrigatória', imageRequire: true} )
+            }
+
             const { filename } = req.file;
 
             //Se ele encontrar um usúario com este e=mail ele vai salvar no user 
@@ -95,7 +129,7 @@ module.exports = {
                 });
         };
 
-        submit_account(user);
+        submit_account_token(user);
 
         return res.json(user);
 
@@ -104,8 +138,55 @@ module.exports = {
         }         
     },
 
-    //Função para atualizar o statusAccount (Confirmação por e-mail)
-    async update_statusAccount(req, res){
+    /**
+     * Função para criação de usuário
+     * @param {*usuario} req 
+     * @param {*usuario} res 
+     */
+    async createV2(req, res){
+        try{
+            const { fullname, email, username, password, state, country, help} = req.body;
+
+            if(!req.file){
+                return res.status(400).send( { error: 'Envio da imagem é obrigatória', imageRequire: true} )
+            }
+
+            const { filename } = req.file;
+
+            //Se ele encontrar um usúario com este e=mail ele vai salvar no user 
+            let user = await User.findOne( { email } );
+
+            //Caso já exista um e-mail cadastrado ele irá responder status 400
+            if(user){
+                return res.status(400).send( { error: 'Usuário já existe'} )
+            }
+
+            //Verificação para ver se e-mail já está cadastrado, caso não foi irá entrar no if
+            if(!user){
+                user = await User.create({
+                    fullname, 
+                    email, 
+                    username, 
+                    password, 
+                    state, 
+                    country, 
+                    picture: filename, 
+                    help
+                });
+        };
+
+        submit_account_code(user);
+
+        return res.json(user);
+
+        } catch (err){
+            console.log(err);
+            return res.status(400).send( { error: 'Erro ao criar usuário'} )
+        }         
+    },    
+
+    //Função para atualizar o statusAccount (Confirmação por e-mail), enviando um Token
+    async update_statusAccount_token(req, res){
         const { user_id, token } = req.body;
 
         try{
@@ -126,10 +207,38 @@ module.exports = {
             res.send();
 
         } catch (err){
-            res.status(400).send( { error: "Não é possível resetar a senha, tente novamente mais tarde"} )
+            res.status(400).send( { error: "Não é possível confirmar sua conta, tente novamente mais tarde"} )
         }
 
     },    
+
+    //Função para atualizar o statusAccount (Confirmação por e-mail), enviando um código de 6 digitos
+    async update_statusAccount_code(req, res){
+        const { user_id, codigo } = req.body;
+
+        try{
+            const user = await User.findById({ _id: user_id});
+
+            if(!user){
+                return res.status(400).send( { error: 'Usuário não encontrado' } )
+            }
+
+            if (codigo !== user.confirmation_code){
+                return res.status(400).send( { error: 'Código Inválido' } )
+            }
+            
+            user.statusAccount = 1;
+
+            await user.save();
+
+            res.send();
+
+        } catch (err){
+            console.log(err);
+            res.status(400).send( { error: "Não é possível confirmar sua conta, tente novamente mais tarde"} )
+        }
+
+    },
 
     // Atualização do cadastro
     async update(req, res){
@@ -176,7 +285,7 @@ module.exports = {
     async authenticate(req, res){
         const { email, password } = req.body; 
 
-        const user = await User.findOne( { email } ).select('+password');
+        const user = await User.findOne({ email }).select('+password');
 
         if (!user){
             return res.status(400).send( { error: 'Usuário não encontrado'});
@@ -185,9 +294,9 @@ module.exports = {
         if (user.statusAccount == 2){
             return res.status(400).send( { error: 'Usuário não confirmado, por favor verificar e-mail'});
         }
-        
+
         //Comparando para ver se a senha que o usuário digitou é a mesma que a do banco de dados. Await por que é uma função assincrona
-        if(await bcrypt.compare(password, user.password)){
+        if(!await bcrypt.compare(password, user.password)){
             return res.status(400).send( { error: 'Senha Inválida'});
         }
 
@@ -235,6 +344,7 @@ module.exports = {
                 from: 'visitantesilvapc@gmail.com',
                 template: './forgot_password',
                 context: { token },
+                subject: "Shawime: Token para troca de senha",
             }, (err) => {
                 if (err){
                     return res.status(400).send( { error: 'Não foi possível enviar o e-mail de esqueci a senha, tente novamente'})
@@ -283,6 +393,46 @@ module.exports = {
             res.status(400).send( { error: "Não é possível resetar a senha, tente novamente mais tarde"} )
         }
 
+    },
+
+    //Função para enviar uma nova senha para o usuário (sem token)
+    async newPassword(req, res){
+        const { email } = req.body;
+
+        const newPass = Math.random().toString(36).substring(0, 11);
+
+        try{
+            const user = await User.findOne( { email });
+
+            if(!user){
+                return res.status(400).send( { error: 'Usuário não encontrado' } )
+            }
+
+            user.password = newPass;
+
+            await user.save();
+        
+            mailer.sendMail({
+                to: email,
+                from: 'visitantesilvapc@gmail.com',
+                template: './new_password',
+                context: { newPass },
+                subject: "Shawime: Nova solicitação de senha",
+            }, (err) => {
+                if (err){
+                    return res.status(400).send( { error: 'Não foi possível enviar o e-mail com nova senha, tente novamente'})
+                }
+
+                return res.status(201).send("E-mail enviado com sucesso");
+            });
+            
+            res.send();
+
+        } catch (err){
+            console.log(err);
+            res.status(400).send( { error: 'Erro em esqueci a senha, por favor tente novamente mais tarde' } )
+        }
     }
 
-}; // teste
+
+}; 
