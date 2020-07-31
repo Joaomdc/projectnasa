@@ -105,6 +105,10 @@ module.exports = {
 
             const { filename } = req.file;
 
+            if(filename.includes(' ')){
+                return res.status(400).send( { error: 'Invalid image, please remove spaces for name', imageRequire: true} )
+            }
+
             //Se ele encontrar um usúario com este e=mail ele vai salvar no user 
             let user = await User.findOne( { email } );
 
@@ -151,6 +155,10 @@ module.exports = {
             }
 
             const { filename } = req.file;
+
+            if(filename.includes(' ')){
+                return res.status(400).send( { error: 'Invalid image, please remove spaces for name', imageRequire: true} )
+            }
 
             //Se ele encontrar um usúario com este e=mail ele vai salvar no user 
             let user = await User.findOne( { email } );

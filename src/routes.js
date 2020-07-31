@@ -6,6 +6,7 @@ const UserController = require('./controllers/UserController');
 const HashtagController = require('./controllers/HashtagController');
 const GroupController = require('./controllers/GroupController');
 const MessageController = require('./controllers/MessageController');
+const ImageController = require('./controllers/ImageController');
 
 const routes = express.Router();
 const upload = multer(uploadConfig);
@@ -43,5 +44,8 @@ routes.delete('/group/delete/:groupId', GroupController.delete);
 
 //Message
 routes.post('/message', authMiddleware, MessageController.information);
+
+//Image
+routes.get('/imagem', ImageController.index);
 
 module.exports = routes;
