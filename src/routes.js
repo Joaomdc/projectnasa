@@ -37,6 +37,7 @@ routes.post('/group', authMiddleware, upload.single('picture'), GroupController.
 routes.get('/group', GroupController.index);
 routes.get('/group/find/:groupId', GroupController.indexByGroupId);
 routes.get('/group/hash', GroupController.indexByHashtagId);
+routes.get('/group/userId', GroupController.indexByUserId);
 routes.put('/group/update/:groupId', authMiddleware, upload.single('picture'), GroupController.update);
 routes.delete('/group/delete/:groupId', GroupController.delete);
 

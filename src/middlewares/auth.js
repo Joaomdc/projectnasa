@@ -5,24 +5,24 @@ module.exports = (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader){
-        return res.status(401).send( { error: 'Sem token' } );
+        return res.status(401).send( { error: 'No token' } );
     }
 
     const parts = authHeader.split(' ');
 
     if (!parts.length == 2 ){
-        return res.status(401).send( { error: 'Erro de Token' } );
+        return res.status(401).send( { error: 'Token error' } );
     }
 
     const [ scheme, token ] = parts;
 
     if (!/^Bearer$/i.test(scheme)){
-        return res.status(401).send( { error: 'Token mal formado' } );
+        return res.status(401).send( { error: 'Badly formatted token' } );
     }
 
 
     jwt.verify(token, authConfig.secret, (err, decoded) => {
-        if (err) return res.status(401).send( { error: 'Token Inválido'} );
+        if (err) return res.status(401).send( { error: 'Invalid Token'} );
 
         req.userId = decoded.id;
         return next();
