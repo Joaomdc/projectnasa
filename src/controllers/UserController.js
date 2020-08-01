@@ -90,6 +90,18 @@ module.exports = {
         } 
     },
 
+    // Busca nome do usuário
+    async nameUserById(req, res){
+        try{
+            const user = await User.findById(req);
+    
+            return res = user.username;
+        }catch (err){
+            console.log("Erro ao Buscar nome do usuário")
+        }
+        
+    },
+
     /**
      * Função para criação de usuário
      * @param {*usuario} req 

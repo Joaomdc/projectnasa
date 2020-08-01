@@ -43,7 +43,7 @@ routes.put('/group/update/:groupId', authMiddleware, upload.single('picture'), G
 routes.delete('/group/delete/:groupId', GroupController.delete);
 
 //Message
-routes.post('/message', authMiddleware, MessageController.information);
+routes.get('/message', MessageController.index);
 
 //Image
 routes.get('/imagem', ImageController.index);

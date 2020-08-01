@@ -70,6 +70,16 @@ module.exports = {
         }
     },
 
+    async groupNameById(req, rom){
+        try{
+            const group = await Group.findById(req).populate(['user', 'hashtag']);
+
+            return rom = group.title
+        } catch (err){
+            console.log(err);
+        }
+    },
+
     async delete(req, res){
         try{
             const group = await Group.findByIdAndRemove(req.params.groupId);
