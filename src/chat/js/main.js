@@ -5,12 +5,12 @@ const roomName = document.getElementById('room-name');
 const userList = document.getElementById('users');
 
 //Pegar o nome e sala pela URL
-const {id, username, room} = Qs.parse(location.search, {
+const {user_id, group_id} = Qs.parse(location.search, {
     ignoreQueryPrefix: true
 });
 
 // Entrar na Sala
-socket.emit('joinRoom', {id, username, room});
+socket.emit('joinRoom', {user_id, group_id});
 
 // Pegar sala e usuários
 socket.on('roomUsers', ({ room, users }) => {
