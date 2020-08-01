@@ -18,6 +18,7 @@ app.use(routes);
 
 app.listen(3333);
 
+
 /* Socket Chat */
 const path = require('path');
 const chat = express();
@@ -28,6 +29,8 @@ const { userJoin, getCurrentUser, userLeave, getRoomUsers } = require('./chat/ut
 
 // Ao acessar o endpoint localhost:3003 redireciona para a pasta chat 
 chat.use(express.static(path.join(__dirname, 'chat')));
+
+app.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));
 
 const botName = 'ShaWeMe Bot'
 
