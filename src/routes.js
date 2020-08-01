@@ -36,7 +36,7 @@ routes.put('/users/new_password', UserController.newPassword);
 routes.post('/group', authMiddleware, upload.single('picture'), GroupController.create);
 routes.get('/group', GroupController.index);
 routes.get('/group/find/:groupId', GroupController.indexByGroupId);
-routes.get('/group/hash', GroupController.indexByHashtagId);
+routes.get('/group/hash/:hash', GroupController.indexByHashtagId);
 routes.put('/group/update/:groupId', authMiddleware, upload.single('picture'), GroupController.update);
 routes.delete('/group/delete/:groupId', GroupController.delete);
 
