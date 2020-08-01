@@ -21,7 +21,7 @@ module.exports = {
             })
             return res.json(group);
         } catch (err){
-            return res.status(400).send( { error: 'Erro para cadastro de sala, tente novamente'} )
+            return res.status(400).send( { error: 'Error creating the room, please try again'} )
         }
     },
 
@@ -44,7 +44,7 @@ module.exports = {
         return res.json(room);
 
         } catch (err){
-            return res.status(400).send( { error: 'Erro para atualizar informações da sala'} )
+            return res.status(400).send( { error: 'Error updating room information'} )
         }
     },
 
@@ -54,7 +54,7 @@ module.exports = {
 
             return res.json(group)
         } catch (err){
-            return res.status(400).send( { error: 'Erro para listar todas as salas'} )
+            return res.status(400).send( { error: 'Error listing all rooms'} )
         }
 
     },
@@ -66,7 +66,17 @@ module.exports = {
             return res.json(group)
         } catch (err){
             console.log(err);
-            return res.status(400).send( { error: 'Erro para listar a sala por ID do Grupo'} )
+            return res.status(400).send( { error: 'Error listing room by ID Group'} )
+        }
+    },
+
+    async groupNameById(req, rom){
+        try{
+            const group = await Group.findById(req).populate(['user', 'hashtag']);
+
+            return rom = group.title
+        } catch (err){
+            console.log(err);
         }
     },
 
@@ -76,7 +86,7 @@ module.exports = {
 
             return res.send();
         } catch (err){
-            return res.status(400).send( { error: 'Erro ao deletar sala, tente novamente mais tarde'} )
+            return res.status(400).send( { error: 'Error deleting the room, please try again later'} )
         }        
     },
 
@@ -88,7 +98,19 @@ module.exports = {
 
             return res.json(byhash);
         } catch (err){
-            return res.status(400).send( { error: 'Erro para listar todas as sala por ID do Hashtag'} )
+            return res.status(400).send( { error: 'Error listing all rooms by ID Hashtag'} )
+        }
+    },
+
+    async indexByUserId(req, res){
+        try{
+            const { user_id } = req.body;
+
+            const byuserid = await Group.find({ user: user_id }).populate(['user', 'hashtag']);
+
+            return res.json(byuserid);
+        } catch (err){
+            return res.status(400).send( { error: 'Error listing all rooms by User ID'} )
         }
     },
 };

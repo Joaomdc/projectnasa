@@ -6,6 +6,7 @@ const UserController = require('./controllers/UserController');
 const HashtagController = require('./controllers/HashtagController');
 const GroupController = require('./controllers/GroupController');
 const MessageController = require('./controllers/MessageController');
+const ImageController = require('./controllers/ImageController');
 
 const routes = express.Router();
 const upload = multer(uploadConfig);
@@ -37,10 +38,14 @@ routes.post('/group', authMiddleware, upload.single('picture'), GroupController.
 routes.get('/group', GroupController.index);
 routes.get('/group/find/:groupId', GroupController.indexByGroupId);
 routes.get('/group/hash/:hash', GroupController.indexByHashtagId);
+routes.get('/group/userId', GroupController.indexByUserId);
 routes.put('/group/update/:groupId', authMiddleware, upload.single('picture'), GroupController.update);
 routes.delete('/group/delete/:groupId', GroupController.delete);
 
 //Message
-routes.post('/message', authMiddleware, MessageController.information);
+routes.get('/message', MessageController.index);
+
+//Image
+routes.get('/imagem', ImageController.index);
 
 module.exports = routes;

@@ -6,7 +6,6 @@ const mailer = require('../modules/mailer');
 
 const authConfig = require('../config/auth');
 
-
 //Função de envio de e-mail para confirmação de conta
 async function submit_account_token(user){        
     try{
@@ -23,17 +22,17 @@ async function submit_account_token(user){
             from: 'visitantesilvapc@gmail.com',
             template: './submit_account',
             context: { token, id: user._id},
-            subject: "Shawime: Confirmação de conta com token"
+            subject: "Shawime: Token account verification"
         }, (err) => {
             if (err){
-                return res.status(400).send( { error: 'Não foi possível enviar o e-mail para cadastrar a conta, tente novamente'})
+                return res.status(400).send( { error: 'It was not possible to send the e-mail, please try again'})
             }
-            return res.status(201).send("E-mail enviado com sucesso");
+            return res.status(201).send("E-mail successfully sent");
         });
         
 
     } catch (err){
-        res.status(400).send( { error: 'Erro para cadastrar conta, tente novamente' } )
+        res.status(400).send( { error: 'Error registering the account, please try again' } )
     }
 };
 
@@ -53,17 +52,17 @@ async function submit_account_code(user){
             from: 'visitantesilvapc@gmail.com',
             template: './submit_account_code',
             context: { code },
-            subject: "Shawime: Seu código de confirmação está aqui",
+            subject: "Shawime: Account verification with code",
         }, (err) => {
             if (err){
-                return res.status(400).send( { error: 'Não foi possível enviar o código para confirmação, tente novamente'})
+                return res.status(400).send( { error: 'It was not possible to send the e-mail with code, please try again'})
             }
-            return res.status(201).send("E-mail enviado com sucesso");
+            return res.status(201).send("E-mail successfully sent");
         });
         
 
     } catch (err){
-        res.status(400).send( { error: 'Erro para cadastrar conta, tente novamente' } )
+        res.status(400).send( { error: 'Error registering the account, please try again' } )
     }
 };
 
@@ -76,18 +75,29 @@ module.exports = {
 
             return res.json(user)
         } catch (err){
-            return res.status(400).send( { error: 'Erro ao listar todos os usuários'} )
+            return res.status(400).send( { error: 'Error listing all users'} )
         } 
     },
 
     // Listar o usúario por ID
     async indexID(req, res){
         try{
-            const user = await User.findById(req.body);
+            const user = await User.findById(req.body); 
     
             return res.send({user});
         }catch (err){
-            return res.status(400).send({ error: 'Erro ao listar os usuário por ID'});
+            return res.status(400).send({ error: 'Error listing all users by ID'});
+        } 
+    },
+
+    // Busca nome do usuário
+    async nameUserById(req, res){
+        try{
+            const user = await User.findById(req);
+    
+            return res = user.username;
+        }catch (err){
+            console.log("Erro ao Buscar nome do usuário")
         }
         
     },
@@ -99,20 +109,24 @@ module.exports = {
      */
     async create(req, res){
         try{
-            const { fullname, email, username, password, state, country, help} = req.body;
+            const { fullname, email, username, password, state, country, help, acceptTerm} = req.body;
 
             if(!req.file){
-                return res.status(400).send( { error: 'Envio da imagem é obrigatória', imageRequire: true} )
+                return res.status(400).send( { error: 'Image upload is required', imageRequire: true} )
             }
 
             const { filename } = req.file;
+
+            if(filename.includes(' ')){
+                return res.status(400).send( { error: 'Invalid image, please remove spaces for name', imageRequire: true} )
+            }
 
             //Se ele encontrar um usúario com este e=mail ele vai salvar no user 
             let user = await User.findOne( { email } );
 
             //Caso já exista um e-mail cadastrado ele irá responder status 400
             if(user){
-                return res.status(400).send( { error: 'Usuário já existe'} )
+                return res.status(400).send( { error: 'User already exists'} )
             }
 
             //Verificação para ver se e-mail já está cadastrado, caso não foi irá entrar no if
@@ -125,7 +139,8 @@ module.exports = {
                     state, 
                     country, 
                     picture: filename, 
-                    help
+                    help,
+                    acceptTerm
                 });
         };
 
@@ -134,7 +149,7 @@ module.exports = {
         return res.json(user);
 
         } catch (err){
-            return res.status(400).send( { error: 'Erro ao criar usuário'} )
+            return res.status(400).send( { error: 'Error creating user'} )
         }         
     },
 
@@ -145,20 +160,24 @@ module.exports = {
      */
     async createV2(req, res){
         try{
-            const { fullname, email, username, password, state, country, help} = req.body;
+            const { fullname, email, username, password, state, country, help, acceptTerm} = req.body;
 
             if(!req.file){
-                return res.status(400).send( { error: 'Envio da imagem é obrigatória', imageRequire: true} )
+                return res.status(400).send( { error: 'Image upload is required', imageRequire: true} )
             }
 
             const { filename } = req.file;
+
+            if(filename.includes(' ')){
+                return res.status(400).send( { error: 'Invalid image, please remove spaces for name', imageRequire: true} )
+            }
 
             //Se ele encontrar um usúario com este e=mail ele vai salvar no user 
             let user = await User.findOne( { email } );
 
             //Caso já exista um e-mail cadastrado ele irá responder status 400
             if(user){
-                return res.status(400).send( { error: 'Usuário já existe'} )
+                return res.status(400).send( { error: 'User already exists'} )
             }
 
             //Verificação para ver se e-mail já está cadastrado, caso não foi irá entrar no if
@@ -171,7 +190,8 @@ module.exports = {
                     state, 
                     country, 
                     picture: filename, 
-                    help
+                    help,
+                    acceptTerm
                 });
         };
 
@@ -181,7 +201,7 @@ module.exports = {
 
         } catch (err){
             console.log(err);
-            return res.status(400).send( { error: 'Erro ao criar usuário'} )
+            return res.status(400).send( { error: 'Error creating user'} )
         }         
     },    
 
@@ -193,11 +213,11 @@ module.exports = {
             const user = await User.findById( { _id: user_id }).select('+accountToken');
 
             if(!user){
-                return res.status(400).send( { error: 'Usuário não encontrado' } )
+                return res.status(400).send( { error: 'User not found' } )
             }
 
             if (token !== user.accountToken){
-                return res.status(400).send( { error: 'Token Inválido' } )
+                return res.status(400).send( { error: 'Invalid Token' } )
             }
 
             user.statusAccount = 1;
@@ -207,7 +227,7 @@ module.exports = {
             res.send();
 
         } catch (err){
-            res.status(400).send( { error: "Não é possível confirmar sua conta, tente novamente mais tarde"} )
+            res.status(400).send( { error: "Its not possible confirm your account, please try again later"} )
         }
 
     },    
@@ -220,11 +240,11 @@ module.exports = {
             const user = await User.findById({ _id: user_id});
 
             if(!user){
-                return res.status(400).send( { error: 'Usuário não encontrado' } )
+                return res.status(400).send( { error: 'User not found' } )
             }
 
             if (codigo !== user.confirmation_code){
-                return res.status(400).send( { error: 'Código Inválido' } )
+                return res.status(400).send( { error: 'Invalid code' } )
             }
             
             user.statusAccount = 1;
@@ -235,7 +255,7 @@ module.exports = {
 
         } catch (err){
             console.log(err);
-            res.status(400).send( { error: "Não é possível confirmar sua conta, tente novamente mais tarde"} )
+            res.status(400).send( { error: "Its not possible confirm your account, please try again later"} )
         }
 
     },
@@ -264,7 +284,7 @@ module.exports = {
             };
             return res.json(user);
         }catch (err){
-            return res.status(400).send({ error: 'Erro ao atualizar os dados do usuário'});
+            return res.status(400).send({ error: 'Error updating user data'});
         }    
     },
 
@@ -277,7 +297,7 @@ module.exports = {
     
             return res.json(user)
         } catch (err){
-            return res.status(400).send( { error: 'Erro ao deletar usuário'} )
+            return res.status(400).send( { error: 'Error deleting user'} )
         }
     },
 
@@ -288,16 +308,16 @@ module.exports = {
         const user = await User.findOne({ email }).select('+password');
 
         if (!user){
-            return res.status(400).send( { error: 'Usuário não encontrado'});
+            return res.status(400).send( { error: 'User not found'});
         }
 
         if (user.statusAccount == 2){
-            return res.status(400).send( { error: 'Usuário não confirmado, por favor verificar e-mail'});
+            return res.status(400).send( { error: 'User not confirmed, please check your e-mail', userStatusBlock: true, _id: user._id });
         }
 
         //Comparando para ver se a senha que o usuário digitou é a mesma que a do banco de dados. Await por que é uma função assincrona
         if(!await bcrypt.compare(password, user.password)){
-            return res.status(400).send( { error: 'Senha Inválida'});
+            return res.status(400).send( { error: 'invalid password'});
         }
 
         //Para não voltar a senha
@@ -324,7 +344,7 @@ module.exports = {
             const user = await User.findOne( { email });
 
             if(!user){
-                return res.status(400).send( { error: 'Usuário não encontrado' } )
+                return res.status(400).send( { error: 'User not found' } )
             }
 
             const token = crypto.randomBytes(20).toString('hex');
@@ -344,17 +364,17 @@ module.exports = {
                 from: 'visitantesilvapc@gmail.com',
                 template: './forgot_password',
                 context: { token },
-                subject: "Shawime: Token para troca de senha",
+                subject: "Shawime: Token for password change",
             }, (err) => {
                 if (err){
-                    return res.status(400).send( { error: 'Não foi possível enviar o e-mail de esqueci a senha, tente novamente'})
+                    return res.status(400).send( { error: 'It was not possible to send the e-mail forgot password, please try again'})
                 }
 
-                return res.status(201).send("E-mail enviado com sucesso");
+                return res.status(201).send("E-mail successfully sent");
             });
 
         } catch (err){
-            res.status(400).send( { error: 'Erro em esqueci a senha, tente novamente' } )
+            res.status(400).send( { error: 'Error in forgot password, please try again' } )
         }
     },
 
@@ -370,17 +390,17 @@ module.exports = {
             const user = await User.findOne( { email }).select('+passwordResetToken passwordResetExpires');
 
             if(!user){
-                return res.status(400).send( { error: 'Usuário não encontrado' } )
+                return res.status(400).send( { error: 'User not found' } )
             }
 
             if (token !== user.passwordResetToken){
-                return res.status(400).send( { error: 'Token Inválido' } )
+                return res.status(400).send( { error: 'Invalid Token' } )
             }
 
             const now = new Date();
 
             if (now > user.passwordResetExpires){
-                return res.status(400).send( { error: 'Token expirado, tente novamente' } )
+                return res.status(400).send( { error: 'Expired Token, try again' } )
             }
 
             user.password = password;
@@ -390,7 +410,7 @@ module.exports = {
             res.send();
 
         } catch (err){
-            res.status(400).send( { error: "Não é possível resetar a senha, tente novamente mais tarde"} )
+            res.status(400).send( { error: "It was not possible change password, please try again later"} )
         }
 
     },
@@ -405,7 +425,7 @@ module.exports = {
             const user = await User.findOne( { email });
 
             if(!user){
-                return res.status(400).send( { error: 'Usuário não encontrado' } )
+                return res.status(400).send( { error: 'User not found' } )
             }
 
             user.password = newPass;
@@ -417,20 +437,20 @@ module.exports = {
                 from: 'visitantesilvapc@gmail.com',
                 template: './new_password',
                 context: { newPass },
-                subject: "Shawime: Nova solicitação de senha",
+                subject: "Shawime: New Password request",
             }, (err) => {
                 if (err){
-                    return res.status(400).send( { error: 'Não foi possível enviar o e-mail com nova senha, tente novamente'})
+                    return res.status(400).send( { error: 'It was not possible send the new password, please try again'})
                 }
 
-                return res.status(201).send("E-mail enviado com sucesso");
+                return res.status(201).send("Email Successfully sent");
             });
             
             res.send();
 
         } catch (err){
             console.log(err);
-            res.status(400).send( { error: 'Erro em esqueci a senha, por favor tente novamente mais tarde' } )
+            res.status(400).send( { error: 'Error in forgot password, please try again later' } )
         }
     }
 
